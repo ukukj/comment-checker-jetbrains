@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="io.github.ukukj.commentchecker">
+        <declarations language="Python" implementationClass="dev.commentchecker.lang.python.PythonDeclarations"/>
+    </extensions>
+</idea-plugin>

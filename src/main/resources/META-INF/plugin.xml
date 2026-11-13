@@ -1,0 +1,68 @@
+<idea-plugin>
+    <id>io.github.ukukj.commentchecker</id>
+    <name>Comment Checker</name>
+    <vendor url="https://github.com/ukukj">ukukj</vendor>
+    <description><![CDATA[
+    Review changed comments before commit.
+    Adds a <b>Comments</b> tab to the Commit tool window. It lists the comments on changed lines of the files shown there
+    (Changes and Unversioned Files), grouped by file, class and method.
+    <ul>
+      <li>Marks added, modified and deleted comments. Deleted comments open in the diff.</li>
+      <li>Filters by comment type: doc, line and block.</li>
+      <li>UI in English and Korean, following the IDE language.</li>
+    </ul>
+    <b>Languages</b>
+    <ul>
+      <li>Java, Kotlin, Python: dedicated rules (Python docstrings included).</li>
+      <li>JavaScript, TypeScript (including JSX), Go: classes and functions from the editor breadcrumbs.</li>
+      <li>Other languages with an installed language plugin (XML, YAML, …): all comments are listed.
+          Grouping by class and function depends on the language.</li>
+    </ul>
+    <br/>
+    Commit 창에 Comments 탭을 붙여, 거기 오른 파일(Changes·Unversioned Files)의 바뀐 줄에 걸친 주석을 파일·클래스·메서드별로 모아 보여준다.
+    추가·수정·삭제된 주석을 구분한다.
+    <ul>
+      <li>Java·Kotlin·Python: 전용 규칙 (Python docstring 포함)</li>
+      <li>JavaScript·TypeScript(JSX 포함)·Go: 편집기 브레드크럼으로 클래스·함수 판정</li>
+      <li>그 밖에 언어 플러그인이 설치된 언어(XML·YAML 등): 주석은 다 나오고, 클래스·함수 묶음은 언어마다 다름</li>
+    </ul>
+    ]]></description>
+
+    <resource-bundle>messages.CommentCheckerBundle</resource-bundle>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.vcs</depends>
+    <!-- 언어 플러그인은 선택 의존. 없는 IDE(PyCharm 등)에서는 그 묶음만 로드하지 않음 -->
+    <depends optional="true" config-file="commentchecker-java.xml">com.intellij.java</depends>
+    <depends optional="true" config-file="commentchecker-kotlin.xml">org.jetbrains.kotlin</depends>
+    <!-- 모듈 별칭(com.intellij.modules.python) 대신 플러그인 ID. IntelliJ 에 설치한 Python 플러그인과 PyCharm 모두 PythonCore -->
+    <depends optional="true" config-file="commentchecker-python.xml">PythonCore</depends>
+
+    <!-- Kotlin 플러그인은 이 선언을 메인 plugin.xml 에서만 봄. 선택 묶음에 두면 K2 모드에서 Kotlin 묶음이 통째로 꺼짐.
+         Kotlin 이 없는 IDE 에서는 확장 지점이 없어 무시됨 -->
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true"/>
+    </extensions>
+
+    <extensionPoints>
+        <extensionPoint qualifiedName="io.github.ukukj.commentchecker.declarations"
+                        beanClass="com.intellij.lang.LanguageExtensionPoint"
+                        dynamic="true">
+            <with attribute="implementationClass" implements="dev.commentchecker.core.Declarations"/>
+        </extensionPoint>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <changesViewContent id="commentchecker.tab"
+                            tabName="Comments"
+                            className="dev.commentchecker.ui.CommentsTabProvider"
+                            isInCommitToolWindow="true"/>
+    </extensions>
+
+    <actions>
+        <action id="CommentChecker.Show"
+                class="dev.commentchecker.ui.ShowChangedCommentsAction">
+            <add-to-group group-id="ChangesViewPopupMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="io.github.ukukj.commentchecker">
+        <declarations language="kotlin" implementationClass="dev.commentchecker.lang.kotlin.KotlinDeclarations"/>
+    </extensions>
+</idea-plugin>

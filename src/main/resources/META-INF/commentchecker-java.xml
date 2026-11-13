@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="io.github.ukukj.commentchecker">
+        <declarations language="JAVA" implementationClass="dev.commentchecker.lang.java.JavaDeclarations"/>
+    </extensions>
+</idea-plugin>
