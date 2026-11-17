@@ -1,0 +1,98 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag matches version
+        id: version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' build.gradle.kts)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match version \"$version\" in build.gradle.kts"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Change notes for this version
+        run: |
+          mkdir release
+          python3 - "$VERSION" > release/release-notes.md <<'EOF'
+          import re, sys
+          v = sys.argv[1]
+          src = open("build.gradle.kts", encoding="utf-8").read()
+          m = re.search(r"<b>" + re.escape(v) + r"</b>\s*<ul>(.*?)</ul>", src, re.S)
+          if not m:
+              sys.exit(f"no change notes for {v} in build.gradle.kts")
+          for item in re.findall(r"<li>(.*?)</li>", m.group(1), re.S):
+              print("- " + " ".join(item.split()))
+          EOF
+          cat release/release-notes.md
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: ./gradlew test buildPlugin verifyPlugin
+      - run: cp "build/distributions/comment-checker-jetbrains-$VERSION.zip" release/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release
+          path: release/
+          if-no-files-found: error
+
+  marketplace:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: marketplace
+      url: https://plugins.jetbrains.com/plugin/36103-comment-checker
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release
+      - name: Upload to JetBrains Marketplace
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if [ -z "$PUBLISH_TOKEN" ]; then
+            echo "::error::PUBLISH_TOKEN is not set in the marketplace environment"
+            exit 1
+          fi
+          code=$(curl -sS -o response.txt -w '%{http_code}' \
+            -H "Authorization: Bearer $PUBLISH_TOKEN" \
+            -F xmlId=io.github.ukukj.commentchecker \
+            -F "file=@comment-checker-jetbrains-$VERSION.zip" \
+            https://plugins.jetbrains.com/api/updates/upload)
+          case "$code" in
+            2??) echo "uploaded $VERSION (HTTP $code). It goes live after Marketplace approval." ;;
+            *) echo "::error::Marketplace upload failed (HTTP $code)"; cat response.txt; exit 1 ;;
+          esac
+
+  github-release:
+    needs: [build, marketplace]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "comment-checker-jetbrains-$VERSION.zip" \
+            --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "Comment Checker $VERSION" --notes-file release-notes.md

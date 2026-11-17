@@ -22,11 +22,15 @@ Deleted comments are listed too and open in the diff.
 
 ## Install
 
+Settings → Plugins → Marketplace, search for **Comment Checker** and install. Also on [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/36103-comment-checker).
+
+To install from a zip, download it from [Releases](https://github.com/ukukj/comment-checker-jetbrains/releases) or build it:
+
 ```bash
 ./gradlew buildPlugin    # needs JDK 21 (JAVA_HOME)
 ```
 
-Install `build/distributions/comment-checker-jetbrains-1.0.0.zip` with Settings → Plugins → ⚙ → **Install Plugin from Disk…**.
+Then install `build/distributions/comment-checker-jetbrains-<version>.zip` with Settings → Plugins → ⚙ → **Install Plugin from Disk…**.
 
 ## Usage
 
@@ -77,7 +81,7 @@ Marks
 ./gradlew test --tests '*PanelSnapshotTest*' --rerun -PsnapshotRepo=<repo> -PsnapshotBase=dev -PsnapshotOut=/tmp/panel.png
 ```
 
-Builds against `/Applications/IntelliJ IDEA.app`. Use `-PlocalIde=<path>` for another location.
+Builds against `/Applications/IntelliJ IDEA.app`. Use `-PlocalIde=<path>` for another location. Without an installed IDE (e.g. in CI), IntelliJ IDEA 2026.1 is downloaded.
 
 ## Translations
 

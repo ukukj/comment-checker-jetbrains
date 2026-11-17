@@ -22,11 +22,15 @@ Commit 창에 **Comments** 탭을 붙인다. Commit 창에 오른 파일(Changes
 
 ## 설치
 
+Settings → Plugins → Marketplace 에서 **Comment Checker** 를 검색해 설치한다. [JetBrains Marketplace 페이지](https://plugins.jetbrains.com/plugin/36103-comment-checker)에도 있다.
+
+zip 으로 설치하려면 [Releases](https://github.com/ukukj/comment-checker-jetbrains/releases)에서 받거나 직접 빌드한다.
+
 ```bash
-JAVA_HOME=~/Library/Java/JavaVirtualMachines/ms-21.0.12/Contents/Home ./gradlew buildPlugin
+./gradlew buildPlugin    # JDK 21 필요 (JAVA_HOME)
 ```
 
-`build/distributions/comment-checker-jetbrains-1.0.0.zip` 을 Settings → Plugins → ⚙ → **Install Plugin from Disk…** 로 설치한다.
+`build/distributions/comment-checker-jetbrains-<version>.zip` 을 Settings → Plugins → ⚙ → **Install Plugin from Disk…** 로 설치한다.
 
 ## 쓰는 법
 
@@ -77,7 +81,7 @@ JAVA_HOME=~/Library/Java/JavaVirtualMachines/ms-21.0.12/Contents/Home ./gradlew 
 ./gradlew test --tests '*PanelSnapshotTest*' --rerun -PsnapshotRepo=<저장소> -PsnapshotBase=dev -PsnapshotOut=/tmp/panel.png
 ```
 
-`/Applications/IntelliJ IDEA.app` 을 빌드 대상으로 쓴다. 다른 위치면 `-PlocalIde=<경로>`.
+`/Applications/IntelliJ IDEA.app` 을 빌드 대상으로 쓴다. 다른 위치면 `-PlocalIde=<경로>`. 설치된 IDE 가 없으면(CI 등) IntelliJ IDEA 2026.1 을 내려받는다.
 
 ## 라이선스
 

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "io.github.ukukj"
-version = "1.0.0"
+version = "1.0.1"
 
 // 설치된 IDE 를 그대로 빌드 대상으로. 버전 불일치 없고 IDE 를 따로 내려받지 않음
 val localIde = providers.gradleProperty("localIde").orElse("/Applications/IntelliJ IDEA.app")
@@ -16,6 +16,13 @@ val localIde = providers.gradleProperty("localIde").orElse("/Applications/Intell
 // Python 플러그인은 IntelliJ 기본 탑재가 아니라 마켓에서 설치한 것을 그대로 씀. 컴파일·테스트에만 필요
 val pythonPlugin = providers.gradleProperty("pythonPlugin")
     .orElse("${System.getProperty("user.home")}/Library/Application Support/JetBrains/IntelliJIdea2026.1/plugins/python-ce")
+
+// 설치본이 없는 곳(CI)은 같은 버전을 내려받음. 설치한 IDE 를 올리면 두 버전도 같이 올릴 것
+val ideVersion = "2026.1"
+val pythonVersion = "261.22158.277"
+// -P 로 경로를 주면 없어도 내려받지 않고 실패하도록
+val useLocalIde = providers.gradleProperty("localIde").isPresent || file(localIde.get()).isDirectory
+val useLocalPython = providers.gradleProperty("pythonPlugin").isPresent || file(pythonPlugin.get()).isDirectory
 
 val userPlugins = "${System.getProperty("user.home")}/Library/Application Support/JetBrains/IntelliJIdea2026.1/plugins"
 val goPlugin = providers.gradleProperty("goPlugin").orElse("$userPlugins/go-plugin")
@@ -32,10 +39,10 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        local(localIde)
+        if (useLocalIde) local(localIde) else intellijIdea(ideVersion)
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.kotlin")
-        localPlugin(pythonPlugin)
+        if (useLocalPython) localPlugin(pythonPlugin) else plugin("PythonCore", pythonVersion)
         // 테스트 전용. 본 코드에서 이 플러그인들의 클래스를 참조하지 못하도록 컴파일 대상에서 뺌
         testBundledPlugin("JavaScript")
         testBundledPlugin("org.jetbrains.plugins.yaml")
@@ -63,10 +70,10 @@ kotlin {
 intellijPlatform {
     buildSearchableOptions = false
     instrumentCode = false
-    // 마켓플레이스 심사와 같은 검사. 설치된 IDE 대상으로만 돌려 IDE 를 따로 내려받지 않음
+    // 마켓플레이스 심사와 같은 검사. 빌드 대상 IDE 로만 돌려 IDE 를 따로 내려받지 않음
     pluginVerification {
         ides {
-            local(file(localIde.get()))
+            current()
             // -PverifyPyCharm 을 줄 때만. Java·Kotlin 없는 IDE 에서 로드되는지 확인용 (PyCharm 을 내려받음)
             if (providers.gradleProperty("verifyPyCharm").isPresent) {
                 create(IntelliJPlatformType.PyCharm, "2026.1")
@@ -80,6 +87,11 @@ intellijPlatform {
             untilBuild = provider { null }
         }
         changeNotes = """
+            <b>1.0.1</b>
+            <ul>
+              <li>Plugin description in English only. The Korean description is in README.ko.md on GitHub.</li>
+              <li>The description now says that build scripts, CI workflows and config files are checked too.</li>
+            </ul>
             <b>1.0.0</b>
             <ul>
               <li>First public release.</li>
