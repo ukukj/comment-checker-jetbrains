@@ -7,16 +7,13 @@
     Adds a <b>Comments</b> tab to the Commit tool window. It lists the comments on changed lines of the files shown there
     (Changes and Unversioned Files), grouped by file, class and method.
     <ul>
-      <li>Not just source code: build scripts, CI workflows and config files too
-          (any file type with an installed language plugin).</li>
+      <li>Any language with an installed language plugin. Whatever the plugin recognizes as a comment is listed,
+          in source code, build scripts, CI workflows and config files alike.</li>
+      <li>Files that open without a language plugin (highlighting only) are listed as not checked,
+          so they don't look comment-free.</li>
       <li>Marks added, modified and deleted comments. Deleted comments open in the diff.</li>
       <li>Filters by comment type: doc, line and block.</li>
       <li>UI in English and Korean, following the IDE language.</li>
-    </ul>
-    <b>Grouping by class and method</b>
-    <ul>
-      <li>Java, Kotlin, Python: dedicated rules (Python docstrings included).</li>
-      <li>Other languages: from the editor breadcrumbs, verified on JavaScript, TypeScript and Go.</li>
     </ul>
     ]]></description>
 

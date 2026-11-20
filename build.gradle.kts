@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "io.github.ukukj"
-version = "1.0.1"
+version = "1.0.2"
 
 // 설치된 IDE 를 그대로 빌드 대상으로. 버전 불일치 없고 IDE 를 따로 내려받지 않음
 val localIde = providers.gradleProperty("localIde").orElse("/Applications/IntelliJ IDEA.app")
@@ -87,6 +87,11 @@ intellijPlatform {
             untilBuild = provider { null }
         }
         changeNotes = """
+            <b>1.0.2</b>
+            <ul>
+              <li>The description now says that comments are checked in every language with an installed language plugin.
+                  This was already the case; the old description read as if only the listed languages were supported.</li>
+            </ul>
             <b>1.0.1</b>
             <ul>
               <li>Plugin description in English only. The Korean description is in README.ko.md on GitHub.</li>

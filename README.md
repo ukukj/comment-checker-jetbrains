@@ -12,13 +12,10 @@ Deleted comments are listed too and open in the diff.
 
 ## Supported
 
-- IDEs: IntelliJ IDEA, PyCharm and other JetBrains IDEs, 2026.1 or later. The Java, Kotlin and Python plugins are optional dependencies.
+- IDEs: IntelliJ IDEA, PyCharm and other JetBrains IDEs, 2026.1 or later.
 - UI language: follows the IDE language. Korean when the Korean language pack is active, English otherwise.
-- Languages
-  - Java, Kotlin, Python: dedicated rules. Python docstrings count as doc comments.
-  - Other languages the IDE parses and that have comment syntax (XML, YAML, SQL, TS, …): all comments are found, and classes and functions come from the editor breadcrumbs.
-    JavaScript, TypeScript (including JSX) and Go are verified with tests and real repositories. Signatures are only as detailed as the breadcrumbs (full for Go, `find()` for JS/TS).
-  - Files whose language plugin is not installed (e.g. TS or Go in the free IntelliJ IDEA) are not checked. They are listed under "Not checked: no language plugin installed", so they do not look like files without comments.
+- Languages: any language with an installed language plugin. Whatever the plugin recognizes as a comment is listed, in source code, build scripts, CI workflows and config files alike.
+- Files that open without a language plugin (highlighting only) are not checked. They are listed under "Not checked: no language plugin installed", so they don't look comment-free.
 
 ## Install
 
@@ -53,21 +50,18 @@ Marks
 - Files: everything shown in the Commit window (Changes and Unversioned Files). In git, a new file stays Unversioned until `git add`, so leaving those out would drop every comment in new files. Files in .gitignore are not read.
 - Changed lines: the same basis as the Commit window (HEAD ↔ working copy). Unsaved edits are included. An Unversioned file counts as entirely new.
 - Owner declaration
-  - A comment right above a declaration (no blank line) belongs to that declaration. KDoc/Javadoc included.
-  - A trailing `code // comment` belongs to the declaration that ends on that line.
-  - Anything else belongs to the enclosing declaration. Local variables, local classes, anonymous classes and lambdas inside a function do not count as declarations.
+  - A comment right above a declaration (no blank line) belongs to that declaration. Doc comments included.
+  - A trailing comment after code belongs to the declaration that ends on that line.
+  - Anything else belongs to the enclosing declaration. Parameters, local variables, lambdas, callbacks and anonymous classes inside a function do not count as declarations.
 - If only code changed and the comment text is the same (trailing comments, indentation changes), the comment is not shown.
 
 ## Known limitations
 
 - The only comparison basis is HEAD ↔ working copy. A whole branch (e.g. commits since `dev`) is not supported.
 - Generated or scratch files not in .gitignore show up as Unversioned and mix into the list. Add them to .gitignore to filter them out.
-- For languages without dedicated rules, only named elements shown in the breadcrumbs count as declarations. Breadcrumbs differ by language, so results can vary slightly.
-  - Function parameters, everything declared inside a function body (Go `x := 1`, JS `const`/`var`/`function`, object keys, callbacks such as `useMutation({ onSuccess() {} })`) and JSX tags do not count as declarations. This holds for `const Card = () => {…}` as well as `function Card() {…}`. Functions inside an anonymous wrapper such as an IIFE or `define(function(){…})` do count; variables there do not.
-  - For a TS field with a decorator (`@Input() name`), the comment above attaches to the class, not the field.
-  - Comments inside anonymous callbacks such as test `describe`/`it` have no owner and sit directly under the file.
-  - JS comments in an HTML `<script>` attach to `html › body › script`, not to the function.
-- Kotlin scripts such as `build.gradle.kts` treat declarations as local, so their comments sit directly under the file.
+- Declarations are read from the language plugin, so grouping can differ slightly between languages.
+  - Code embedded in another file type, such as a script in markup, is grouped by the outer file's structure.
+  - Where the language plugin exposes no declarations, as in some script files, comments sit directly under the file.
 - Files over 1 MB are skipped.
 
 ## Development
